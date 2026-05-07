@@ -1,0 +1,37 @@
+val arr = Array(5, 2, 8, 1, 3)
+
+var rdd = sc.parallelize(arr, 1)   // single partition
+
+for(i <- 0 until arr.length) {
+    rdd = rdd.mapPartitions(iter => {
+        val a = iter.toArray
+
+        for(j <- 0 until a.length - 1) {
+            if(a(j) > a(j + 1)) {
+                val temp = a(j)
+                a(j) = a(j + 1)
+                a(j + 1) = temp
+            }
+        }
+
+        a.iterator
+    })
+}
+
+println("Sorted array:")
+rdd.collect().foreach(x => print(x + " "))
+
+// :load bubblesort.scala
+
+val data = Seq("Spark is fast", "Spark is fun", "Scala is powerful")
+
+val rdd = sc.parallelize(data)
+
+val counts = rdd
+  .flatMap(line => line.split(" "))
+  .map(word => (word, 1))
+  .reduceByKey(_ + _)
+
+counts.collect().foreach(println)
+
+// :load WordCount.scala
